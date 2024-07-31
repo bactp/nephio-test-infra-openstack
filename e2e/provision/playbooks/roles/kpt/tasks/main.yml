@@ -1,0 +1,227 @@
+---
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2023 The Nephio Authors.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+
+- name: Define working directory
+  ansible.builtin.set_fact:
+    workdir: "{{ local_dest_directory | default('/tmp/kpt-pkg/' + pkg) }}"
+
+- name: "Create base directory if it does not exist: {{ workdir }}"
+  ansible.builtin.file:
+    mode: '0755'
+    path: "{{ workdir | dirname }}"
+    state: directory
+
+
+
+
+- name: "Fetch package: {{ pkg }}"
+  kpt:
+    repo_uri: "{{ repo_uri }}"
+    pkg_path: "{{ pkg }}"
+    version: "{{ version }}"
+    local_dest_directory: "{{ workdir }}"
+    for_deployment: "{{ for_deployment | default(false) | bool }}"
+    command: pkg-get
+
+- name: "Get package content information for {{ pkg }}"
+  kpt:
+    directory: "{{ workdir }}"
+    command: pkg-tree
+  register: kpt_pkg_tree
+
+- name: "Print package content information for {{ pkg }}"
+  ansible.builtin.debug:
+    var: kpt_pkg_tree.stdout_lines
+
+
+#Get node IP for creating Node port service
+- name: Get the list of nodes in wide format
+  command: kubectl get nodes -o wide --no-headers
+  register: kubectl_output
+
+- name: Extract a node IP address
+  set_fact:
+    node_ip: "{{ kubectl_output.stdout_lines[0].split()[5] }}"
+    
+- name: Display the node IP
+  debug:
+    msg: "The selected node IP is: {{ node_ip }}"
+
+- name: Get HTTP port for gitea service
+  command: kubectl get svc -n gitea gitea -o=jsonpath='{.spec.ports[?(@.port==3000)].nodePort}' 
+  register: http_port_raw
+  changed_when: false
+  check_mode: no
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+- name: Extract HTTP port from raw output
+  set_fact:
+    http_port: "{{ http_port_raw.stdout }}"
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+- name: Display HTTP port
+  debug:
+    msg: "HTTP port for gitea service is {{ http_port }}"
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+- name: Print public facts
+  debug:
+    msg: "The public master DNS name is {{ hostvars['localhost'] }}"
+
+- name: Print public master DNS name
+  debug:
+    msg: "The public master DNS name is {{ hostvars['localhost']['public_dns_name'] }}"
+
+- name: Print EC2 master IP
+  debug:
+    msg: "The EC2 master IP address is {{ hostvars['localhost']['ec2_master_ip'] }}"
+
+- name: Print EC2 slave1 IP
+  debug:
+    msg: "The EC2 slave1 IP address is {{ hostvars['localhost']['ec2_slave1_ip'] }}"
+
+- name: Print EC2 slave2 IP
+  debug:
+    msg: "The EC2 slave2 IP address is {{ hostvars['localhost']['ec2_slave2_ip'] }}"
+
+
+ #modify the repo IP address
+- name: Create a ConfigMap manifest
+  copy:
+    dest: "{{ workdir }}/configmap.yaml"
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: repo-service-node-ip
+        labels:
+          app: node-ip
+      data:
+        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-port: "{{ http_port }}"
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" 
+
+#modify the repo IP address only for the operator
+- name: Create a ConfigMap manifest for Nephio Operator
+  copy:
+    dest: "{{ workdir }}/app/controller/configmap.yaml"
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: repo-service-node-ip
+        labels:
+          app: node-ip
+      data:
+        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-port: "{{ http_port }}"
+  when: workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator" 
+
+  #modify the repo IP address only for argoapp
+- name: Create a ConfigMap manifest for ArgoApp
+  copy:
+    dest: "{{ workdir }}/configmap.yaml"
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: repo-service-node-ip
+        labels:
+          app: node-ip
+      data:
+        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-port: "{{ http_port }}"
+  when: workdir == "/tmp/argoapp/mgmt"
+
+
+
+- name: Get HTTP port for gitea service
+  command: kubectl get svc -n gitea gitea -o=jsonpath='{.spec.ports[?(@.port==3000)].nodePort}'
+  register: http_port_raw
+  changed_when: false
+  check_mode: no
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+- name: Extract HTTP port from raw output
+  set_fact:
+    http_port: "{{ http_port_raw.stdout }}"
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+- name: Display HTTP port
+  debug:
+    msg: "HTTP port for gitea service is {{ http_port }}"
+  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+
+# TODO: Improve the render function
+- name: "Render package: {{ pkg }}"
+  become: true
+  kpt:
+    pkg_path: "{{ workdir }}"
+    command: fn-render
+
+- name: Recursively restore ownership of a directory package
+  ansible.builtin.file:
+    path: "{{ workdir }}"
+    state: directory
+    owner: "{{ ansible_user_uid }}"
+    group: "{{ ansible_user_gid }}"
+    recurse: true
+
+- name: "Get package differences between local and upstream: {{ pkg }}"
+  kpt:
+    pkg_path: "{{ workdir }}"
+    version: "{{ version }}"
+    command: pkg-diff
+  register: kpt_pkg_diff
+
+- name: "Print package differences: {{ pkg }}"
+  ansible.builtin.debug:
+    var: kpt_pkg_diff.stdout_lines
+
+- name: Check package has been initialized
+  ansible.builtin.stat:
+    path: "{{ workdir }}/resourcegroup.yaml"
+  register: kpt_resourcegroup
+
+- name: "Init package: {{ pkg }}"
+  kpt:
+    pkg_path: "{{ workdir }}"
+    version: "{{ version }}"
+    context: "{{ context }}"
+    command: live-init
+  register: kpt_live_init
+  when: not kpt_resourcegroup.stat.exists
+
+- name: "Print package initialization for {{ pkg }}"
+  ansible.builtin.debug:
+    var: kpt_live_init
+
+- name: "Apply package: {{ pkg }}"
+  kpt:
+    pkg_path: "{{ workdir }}"
+    version: "{{ version }}"
+    context: "{{ context }}"
+    command: live-apply
+    reconcile_timeout: "{{ reconcile_timeout }}"
+  async: "{{ kpt_async | int }}"
+  poll: "{{ kpt_poll | int }}"
+  changed_when: false
+  register: kpt_apply
+  until: kpt_apply is not failed
+  retries: 5
+
+- name: "Export job ids array"
+  ansible.builtin.set_fact:
+    all_kpt_apply: "{{ all_kpt_apply | default([]) + [kpt_apply] }}"
+  when: kpt_poll == 0
+
+- name: "Print job ids"
+  ansible.builtin.debug:
+    var: all_kpt_apply
