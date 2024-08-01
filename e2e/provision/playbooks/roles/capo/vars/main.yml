@@ -1,0 +1,23 @@
+---
+# vars file for capa
+
+service_names:
+  - "docker"
+  - "kubelet"
+
+cloud_name_key: "openstack"
+auth_url: "http://192.168.28.10/identity"
+application_credential_id: "ede8c476f9ae4838affd0ce3fb216497"
+application_credential_secret: "VZA6aKWXol-kP9w62z4dZnA56NlIQt7p211Jgnyaq5D7LsBfYFIHt8yF5bI_AVAJ0gCBDVWNnvKNz28K8e1dbg"
+region_name: "RegionOne"
+interface: "public"
+identity_api_version: 3
+auth_type: "v3applicationcredential"
+
+openstack_dns_nameservers: "vitu"
+openstack_failure_domain: "availabilityzonename"
+openstack_control_plane_machine_flavor: "flavor"
+openstack_node_machine_flavor: "flavor"
+openstack_image_name: "imagename"
+openstack_ssh_key_name: "ssheypairname"
+openstack_external_network_id: "externalnetworkID"

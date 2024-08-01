@@ -1,5 +1,0 @@
----
-# vars file for k8s_slave
-service_names:
-  - "docker"
-  - "kubelet"

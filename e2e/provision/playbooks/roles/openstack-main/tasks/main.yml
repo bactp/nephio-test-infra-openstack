@@ -1,0 +1,104 @@
+---
+# tasks file for roles/openstack-main
+
+- name: Authenticate to cloud and return auth token
+  become: false
+  openstack.cloud.auth:
+    cloud: "{{ openstack_cloud }}"
+
+- name: Create or update a security group
+  become: false
+  openstack.cloud.security_group:
+    state: present
+    name: "allow_all_traffic"
+    description: "Security group to allow all traffic"
+  register: security_group
+
+- debug:
+    msg: "{{ security_group }}"
+
+- name: Fetch existing security group rules
+  become: false
+  openstack.cloud.security_group_rule_info:
+    security_group: "{{ security_group.security_group.id }}"
+  register: existing_rules
+
+- name: Add rules to allow all traffic
+  become: false
+  openstack.cloud.security_group_rule:
+    state: present
+    security_group: "{{ security_group.security_group.id }}"
+    direction: "{{ item.direction }}"
+    ethertype: "{{ item.ethertype }}"
+    port_range_max: "{{ item.port_range_max | default(omit) }}"
+    port_range_min: "{{ item.port_range_min | default(omit) }}"
+    protocol: "{{ item.protocol }}"
+    remote_ip_prefix: "{{ item.remote_ip_prefix }}"
+  loop:
+    - { direction: 'ingress', ethertype: 'IPv4', protocol: 'tcp', port_range_min: 1, port_range_max: 65535, remote_ip_prefix: '0.0.0.0/0' }
+    - { direction: 'ingress', ethertype: 'IPv4', protocol: 'udp', port_range_min: 1, port_range_max: 65535, remote_ip_prefix: '0.0.0.0/0' }
+    - { direction: 'ingress', ethertype: 'IPv4', protocol: 'icmp', remote_ip_prefix: '0.0.0.0/0' }
+    - { direction: 'ingress', ethertype: 'IPv6', protocol: 'icmp', remote_ip_prefix: '::/0' }
+  ignore_errors: yes  # Ignore errors related to existing rules
+
+
+- name: Launching three instances on OpenStack
+  become: false
+  openstack.cloud.server:
+    state: present
+    name: "{{ item }}"
+    region_name: "{{ region_name }}"
+    image: "{{ image_id }}"
+    key_name: "{{ key_name }}"
+    timeout: "{{ timeout }}"
+    flavor: "{{ flavor }}"
+    network: "{{ network_id }}"
+    security_groups:
+      - allow_all_traffic
+    auto_ip: true  # Automatically assigns a floating IP
+    # availability_zone: "{{ availability_zone }}" uncomment if available
+  register: servers
+  loop: "{{ instance_tag }}"
+
+
+
+# - debug:
+#     msg: "{{ servers.results[0].server }}"
+
+
+
+- name: Extract the network name key
+  set_fact:
+    dynamic_key: "{{ (servers.results[0].server.addresses | dict2items | first).key }}"
+
+- name: Add 1st instance to host group openstack_control
+  add_host:
+    hostname: "{{ (servers.results[0].server.addresses[dynamic_key] | first).addr }}"
+    groupname: openstack_control
+
+- name: Add 2nd instance to host group openstack_worker
+  add_host:
+    hostname: "{{ (servers.results[1].server.addresses[dynamic_key] | first).addr }}"
+    groupname: openstack_worker
+
+- name: Add 3rd instance to host group openstack_worker
+  add_host:
+    hostname: "{{ (servers.results[2].server.addresses[dynamic_key] | first).addr }}"
+    groupname: openstack_worker
+
+- name: Set ec2 facts
+  set_fact:
+    public_dns_name: "{{ (servers.results[0].server.addresses[dynamic_key] | first).addr }}"
+    control_node_ip: "{{ (servers.results[0].server.addresses[dynamic_key] | first).addr }}"
+    worker_node1_ip: "{{ (servers.results[1].server.addresses[dynamic_key] | first).addr }}"
+    worker_node2_ip: "{{ (servers.results[2].server.addresses[dynamic_key] | first).addr }}"
+  delegate_to: localhost
+
+- name: Wait for SSH to come up
+  wait_for:
+    host: "{{ (servers.results[0].server.addresses[dynamic_key] | first).addr }}"
+    port: 22
+    # delay: 120  # Wait 60 seconds before checking
+    # timeout: 1000  # Wait up to 600 seconds
+    state: started
+  delegate_to: localhost

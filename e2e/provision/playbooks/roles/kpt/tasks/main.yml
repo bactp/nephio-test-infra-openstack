@@ -71,25 +71,25 @@
     msg: "HTTP port for gitea service is {{ http_port }}"
   when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
-- name: Print public facts
+- name: Print Openstack Variable facts
   debug:
-    msg: "The public master DNS name is {{ hostvars['localhost'] }}"
+    msg: "The openstack main variables is {{ hostvars['localhost'] }}"
 
-- name: Print public master DNS name
+- name: Print public control node DNS name/ip
   debug:
-    msg: "The public master DNS name is {{ hostvars['localhost']['public_dns_name'] }}"
+    msg: "The public control DNS name/ip is {{ hostvars['localhost']['public_dns_name'] }}"
 
-- name: Print EC2 master IP
+- name: Print public control node IP
   debug:
-    msg: "The EC2 master IP address is {{ hostvars['localhost']['ec2_master_ip'] }}"
+    msg: "The IP address is {{ hostvars['localhost']['control_node_ip'] }}"
 
-- name: Print EC2 slave1 IP
+- name: Print Worker node 1 IP
   debug:
-    msg: "The EC2 slave1 IP address is {{ hostvars['localhost']['ec2_slave1_ip'] }}"
+    msg: "The Worker Node 1 IP address is {{ hostvars['localhost']['worker_node1_ip'] }}"
 
-- name: Print EC2 slave2 IP
+- name: Print Worker node 1 IP
   debug:
-    msg: "The EC2 slave2 IP address is {{ hostvars['localhost']['ec2_slave2_ip'] }}"
+    msg: "The Worker Node 2 IP address is {{ hostvars['localhost']['worker_node2_ip'] }}"
 
 
  #modify the repo IP address
@@ -104,7 +104,7 @@
         labels:
           app: node-ip
       data:
-        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-ip: "{{ hostvars['localhost']['control_node_ip'] }}"
         node-port: "{{ http_port }}"
   when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" 
 
@@ -120,7 +120,7 @@
         labels:
           app: node-ip
       data:
-        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-ip: "{{ hostvars['localhost']['control_node_ip'] }}"
         node-port: "{{ http_port }}"
   when: workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator" 
 
@@ -136,7 +136,7 @@
         labels:
           app: node-ip
       data:
-        node-ip: "{{ hostvars['localhost']['ec2_master_ip'] }}"
+        node-ip: "{{ hostvars['localhost']['control_node_ip'] }}"
         node-port: "{{ http_port }}"
   when: workdir == "/tmp/argoapp/mgmt"
 

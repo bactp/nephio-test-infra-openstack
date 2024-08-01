@@ -1,0 +1,116 @@
+---
+# tasks file for capo
+
+- name: Ensure the ~/.config/openstack directory exists
+  ansible.builtin.file:
+    path: "~/.config/openstack"
+    state: directory
+    mode: '0700'
+
+- name: Create and populate the clouds.yaml file
+  ansible.builtin.copy:
+    dest: "~/.config/openstack/clouds.yaml"
+    content: |
+      clouds:
+        {{ cloud_name_key }}:
+          auth:
+            auth_url: "{{ auth_url }}"
+            application_credential_id: "{{ application_credential_id }}"
+            application_credential_secret: "{{ application_credential_secret }}"
+          region_name: "{{ region_name }}"
+          interface: "{{ interface }}"
+          identity_api_version: {{ identity_api_version }}
+          auth_type: "{{ auth_type }}"
+    mode: '0600'
+
+- name: Ensure ~/.bashrc exists
+  ansible.builtin.file:
+    path: "~/.bashrc"
+    state: touch
+
+- name: Ensure OpenStack environment variables section is present in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: '# OpenStack environment variables'
+    create: yes
+    insertafter: EOF
+    state: present
+
+- name: Ensure OpenStack DNS Nameservers is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_DNS_NAMESERVERS={{ openstack_dns_nameservers }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack Failure Domain is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_FAILURE_DOMAIN={{ openstack_failure_domain }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack Control Plane Machine Flavor is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_CONTROL_PLANE_MACHINE_FLAVOR={{ openstack_control_plane_machine_flavor }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack Node Machine Flavor is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_NODE_MACHINE_FLAVOR={{ openstack_node_machine_flavor }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack Image Name is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_IMAGE_NAME={{ openstack_image_name }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack SSH Key Name is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_SSH_KEY_NAME={{ openstack_ssh_key_name }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Ensure OpenStack External Network ID is set in ~/.bashrc
+  ansible.builtin.lineinfile:
+    path: "~/.bashrc"
+    line: 'export OPENSTACK_EXTERNAL_NETWORK_ID={{ openstack_external_network_id }}'
+    create: yes
+    insertafter: '# OpenStack environment variables'
+    state: present
+
+- name: Source the ~/.bashrc file to apply changes 
+  ansible.builtin.shell:
+    cmd: "source ~/.bashrc"
+    executable: /bin/bash
+
+- name: Download clusterctl binary
+  become: yes
+  become_method: sudo
+  get_url:
+    url: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.1/clusterctl-linux-amd64
+    dest: /tmp/clusterctl-linux-amd64
+    mode: '0755'
+
+- name: Move clusterctl binary to /usr/local/bin
+  become: yes
+  become_method: sudo
+  command: mv /tmp/clusterctl-linux-amd64 /usr/local/bin/clusterctl
+
+- name: Initialize management cluster
+  become: yes
+  become_method: sudo
+  shell: clusterctl init --infrastructure openstack

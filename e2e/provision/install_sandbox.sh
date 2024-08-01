@@ -49,6 +49,7 @@ sudo tee /etc/ansible/ansible.cfg <<EOT
 pipelining=True
 # Enable SSH Multiplexing
 ansible_ssh_common_args = -o ControlMaster=auto -o ControlPersist=30m -o ConnectionAttempts=100
+ssh_args = -o StrictHostKeyChecking=no
 retries=2
 
 [defaults]
@@ -66,9 +67,8 @@ localhost_warning = False
 deprecation_warnings = False
 command_warnings=False
 ask_pass=False
-# roles_path= ./roles
 force_valid_group_names = ignore
-private_key_file= /home/ubuntu/nephio/test-infra-aws/e2e/provision/playbooks/nephio3.pem
+private_key_file= ~/openstack/nephio-test-infra-openstack/e2e/provision/playbooks/mgmt-key1.pem
 remote_user=ubuntu
 
 [privilege_escalation]
