@@ -8,7 +8,11 @@
     line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
     validate: 'visudo -cf %s'
 
-
+- name: Install yq via snap
+  ansible.builtin.shell:
+    cmd: sudo snap install yq
+    # Run with a specific shell to ensure compatibility
+    executable: /bin/bash
 
 
 - name: disable SWAP (Kubeadm requirement)

@@ -101,7 +101,7 @@
   become: yes
   become_method: sudo
   get_url:
-    url: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.1/clusterctl-linux-amd64
+    url: https://github.com/kubernetes-sigs/cluster-api/releases/download/{{ clusterctl_version }}/clusterctl-linux-amd64
     dest: /tmp/clusterctl-linux-amd64
     mode: '0755'
 
