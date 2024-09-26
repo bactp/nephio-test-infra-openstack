@@ -5,19 +5,24 @@ service_names:
   - "docker"
   - "kubelet"
 
+clusterctl_version: v1.8.3
+
 cloud_name_key: "openstack"
 auth_url: "http://192.168.28.10/identity"
-application_credential_id: "ede8c476f9ae4838affd0ce3fb216497"
-application_credential_secret: "VZA6aKWXol-kP9w62z4dZnA56NlIQt7p211Jgnyaq5D7LsBfYFIHt8yF5bI_AVAJ0gCBDVWNnvKNz28K8e1dbg"
+application_credential_id: "d8985728208c408bb209b1aec1120d5a"
+application_credential_secret: "dJxdsVt46YGJ191U2Zx_9yrQAf4BWpZ3DWLEpeSdGHAGwvUkKA5cKPLXcA1tY0f_nB4kC9qUxA1tvjK-wLBjwg"
 region_name: "RegionOne"
 interface: "public"
 identity_api_version: 3
 auth_type: "v3applicationcredential"
 
-openstack_dns_nameservers: "vitu"
-openstack_failure_domain: "availabilityzonename"
-openstack_control_plane_machine_flavor: "flavor"
-openstack_node_machine_flavor: "flavor"
-openstack_image_name: "imagename"
-openstack_ssh_key_name: "ssheypairname"
-openstack_external_network_id: "externalnetworkID"
+openstack_dns_nameservers: "8.8.8.8"
+openstack_failure_domain: "nova"
+openstack_control_plane_machine_flavor: "m1.large"
+openstack_node_machine_flavor: "m1.large"
+openstack_image_name: "Ubuntu2204-CAPI"
+openstack_ssh_key_name: "nephio"
+openstack_external_network_id: "5fad8e5e-54e5-4f35-88e4-60c164c690c6"
+
+
+# dJxdsVt46YGJ191U2Zx_9yrQAf4BWpZ3DWLEpeSdGHAGwvUkKA5cKPLXcA1tY0f_nB4kC9qUxA1tvjK-wLBjwg

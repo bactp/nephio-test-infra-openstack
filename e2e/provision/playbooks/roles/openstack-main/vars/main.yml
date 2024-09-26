@@ -9,12 +9,12 @@ instance_tag:
 openstack_cloud: openstack
 user_domain_name: Default
 project_domain_name: Default
-project_name: admin
+project_name: nephio-project
 region_name: RegionOne
 availability_zone: "az1"
 network_id: 5fad8e5e-54e5-4f35-88e4-60c164c690c6
 image_id: a28d0c51-6ad3-4330-86bb-2c4d2457e79d #The name or id of the base image to boot.
-key_name: mgmt-key1
+key_name: nephio
 flavor: "77847f97-ee4f-4dbd-975c-80f28ebc3614"
 timeout: 200
 
