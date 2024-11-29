@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: no
+  gather_facts: true
   vars_files:
         - cred.yml
   tasks:
@@ -9,7 +9,7 @@
 
 
 - hosts: openstack_control
-  gather_facts: no
+  gather_facts: true
   vars_files:
     - cred.yml
   tasks:
@@ -18,14 +18,14 @@
         name: k8s_control
 
 - hosts: openstack_worker
-  gather_facts: no
+  gather_facts: true
   tasks:
     - name: Running K8s Worker Role
       include_role:
         name: k8s_workernode
 
 - hosts: openstack_control
-  gather_facts: no
+  gather_facts: true
   vars_files:
     - cred.yml
   environment:
@@ -39,7 +39,7 @@
         name: capo
 
 - hosts: openstack_control
-  gather_facts: no
+  gather_facts: true
   vars_files:
      - mgmt.yml
   tasks:
