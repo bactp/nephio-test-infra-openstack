@@ -8,9 +8,9 @@ service_names:
 clusterctl_version: v1.8.3
 
 cloud_name_key: "openstack"
-auth_url: "http://192.168.24.13/identity"
-application_credential_id: "df91fb627ac5405cb6522e59e5ffe044"
-application_credential_secret: "2DHuSTKmMgczuPBaotZQWcXyDas6YcRBdWkopKmRq-cardHzHNXAx5oTB3XzE78pzrMeAQe9AYtP5RFoVP9QXA"
+auth_url: "http://192.168.24.13:5000/v3/"
+application_credential_id: "4d59a11231854643be93e4f8b8e57a76"
+application_credential_secret: "kWz4bDkYkE_VIqVghXl4qRL62BXgQ6PfMmNOzzqspVwQvUSl1vqswoLrXLUfcEVgWFiFltXDAF1WBbxlySLyHQ"
 region_name: "RegionOne"
 interface: "public"
 identity_api_version: 3
@@ -19,7 +19,7 @@ auth_type: "v3applicationcredential"
 openstack_dns_nameservers: "8.8.8.8"
 openstack_failure_domain: "nova"
 openstack_control_plane_machine_flavor: "m1.large"
-openstack_node_machine_flavor: "m1.large"
+openstack_node_machine_flavor: "m1.xlarge"
 openstack_image_name: "Ubuntu22-CAPI "
 openstack_ssh_key_name: "karmada-kt-24"
 openstack_external_network_id: "88e1ee39-f1e8-4b1b-b77a-a819a366da2b"

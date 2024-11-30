@@ -9,7 +9,7 @@ instance_tag:
 openstack_cloud: openstack
 user_domain_name: Default
 project_domain_name: Default
-project_name: nephio
+project_name: admin
 region_name: RegionOne
 availability_zone: "compute"
 network_id: 88e1ee39-f1e8-4b1b-b77a-a819a366da2b

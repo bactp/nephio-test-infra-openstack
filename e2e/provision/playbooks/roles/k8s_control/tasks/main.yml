@@ -186,7 +186,7 @@
 
 
 - name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
+  command: kubeadm init
 
 - name: Setting up kubectl on control Node
   shell:
