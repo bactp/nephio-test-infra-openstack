@@ -15,6 +15,6 @@ availability_zone: "compute"
 network_id: 88e1ee39-f1e8-4b1b-b77a-a819a366da2b
 image_id: 657c77e0-2942-4efc-9bd5-c69dbfcd83a4 #The name or id of the base image to boot.
 key_name: karmada-kt-24
-flavor:  30a13991-3518-4c99-b2e2-059839d4af36
+flavor: 30a13991-3518-4c99-b2e2-059839d4af36
 timeout: 200
 
