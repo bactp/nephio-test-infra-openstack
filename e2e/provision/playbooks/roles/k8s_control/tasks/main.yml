@@ -7,6 +7,33 @@
     state: present
     line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
     validate: 'visudo -cf %s'
+#k8s key is invalid sometimes, better remove and add a new one
+- name: remove old k8s key
+  ansible.builtin.shell:
+    cmd: sudo rm /etc/apt/sources.list.d/kubernetes.list
+    # Run with a specific shell to ensure compatibility
+    executable: /bin/bash
+
+
+- name: add Kubernetes apt-key
+  get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    mode: '0644'
+    force: true
+
+- name: add Kubernetes' APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+    state: present
+    update_cache: yes
+
+
+- name: apt update
+  ansible.builtin.shell:
+    cmd: sudo apt update
+    # Run with a specific shell to ensure compatibility
+    executable: /bin/bash
 
 - name: Install yq via snap
   ansible.builtin.shell:
@@ -15,46 +42,54 @@
     executable: /bin/bash
 
 
-- name: disable SWAP (Kubeadm requirement)
-  shell: |
-    swapoff -a
 
-- name: disable SWAP in fstab (Kubeadm requirement)
-  replace:
-    path: /etc/fstab
-    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
-    replace: '# \1'
+- name: Install Unzip
+  ansible.builtin.shell:
+    cmd: sudo apt install unzip -y
+    # Run with a specific shell to ensure compatibility
+    executable: /bin/bash
 
-- name: create an empty file for the Containerd module
-  copy:
-    content: ""
-    dest: /etc/modules-load.d/containerd.conf
-    force: no
 
-- name: configure modules for Containerd
-  blockinfile:
-    path: /etc/modules-load.d/containerd.conf
-    block: |
-          overlay
-          br_netfilter
+# - name: disable SWAP (Kubeadm requirement)
+#   shell: |
+#     swapoff -a
 
-- name: create an empty file for Kubernetes sysctl params
-  copy:
-    content: ""
-    dest: /etc/sysctl.d/99-kubernetes-cri.conf
-    force: no
+# - name: disable SWAP in fstab (Kubeadm requirement)
+#   replace:
+#     path: /etc/fstab
+#     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+#     replace: '# \1'
 
-- name: configure sysctl params for Kubernetes
-  lineinfile:
-    path: /etc/sysctl.d/99-kubernetes-cri.conf
-    line: "{{ item }}"
-  with_items:
-    - 'net.bridge.bridge-nf-call-iptables  = 1'
-    - 'net.ipv4.ip_forward                 = 1'
-    - 'net.bridge.bridge-nf-call-ip6tables = 1'
+# - name: create an empty file for the Containerd module
+#   copy:
+#     content: ""
+#     dest: /etc/modules-load.d/containerd.conf
+#     force: no
 
-- name: apply sysctl params without reboot
-  command: sysctl --system
+# - name: configure modules for Containerd
+#   blockinfile:
+#     path: /etc/modules-load.d/containerd.conf
+#     block: |
+#           overlay
+#           br_netfilter
+
+# - name: create an empty file for Kubernetes sysctl params
+#   copy:
+#     content: ""
+#     dest: /etc/sysctl.d/99-kubernetes-cri.conf
+#     force: no
+
+# - name: configure sysctl params for Kubernetes
+#   lineinfile:
+#     path: /etc/sysctl.d/99-kubernetes-cri.conf
+#     line: "{{ item }}"
+#   with_items:
+#     - 'net.bridge.bridge-nf-call-iptables  = 1'
+#     - 'net.ipv4.ip_forward                 = 1'
+#     - 'net.bridge.bridge-nf-call-ip6tables = 1'
+
+# - name: apply sysctl params without reboot
+#   command: sysctl --system
 
 - name: install APT Transport HTTPS
   apt:
@@ -76,82 +111,82 @@
     state: present
     update_cache: yes
 
-- name: add Kubernetes apt-key
-  get_url:
-    url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
-    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
-    mode: '0644'
-    force: true
+# - name: add Kubernetes apt-key
+#   get_url:
+#     url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+#     dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+#     mode: '0644'
+#     force: true
 
-- name: add Kubernetes' APT repository
-  apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
-    state: present
-    update_cache: yes
+# - name: add Kubernetes' APT repository
+#   apt_repository:
+#     repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+#     state: present
+#     update_cache: yes
 
-- name: install Containerd
-  apt:
-    name: containerd.io
-    state: present
+# - name: install Containerd
+#   apt:
+#     name: containerd.io
+#     state: present
 
-- name: create Containerd directory
-  file:
-    path: /etc/containerd
-    state: directory
+# - name: create Containerd directory
+#   file:
+#     path: /etc/containerd
+#     state: directory
 
-- name: add Containerd configuration
-  shell: /usr/bin/containerd config default > /etc/containerd/config.toml
+# - name: add Containerd configuration
+#   shell: /usr/bin/containerd config default > /etc/containerd/config.toml
 
-- name: configuring the systemd cgroup driver for Containerd
-  lineinfile:
-    path: /etc/containerd/config.toml
-    regexp: '            SystemdCgroup = false'
-    line: '            SystemdCgroup = true'
+# - name: configuring the systemd cgroup driver for Containerd
+#   lineinfile:
+#     path: /etc/containerd/config.toml
+#     regexp: '            SystemdCgroup = false'
+#     line: '            SystemdCgroup = true'
 
-- name: enable the Containerd service and start it
-  systemd:
-    name: containerd
-    state: restarted
-    enabled: yes
-    daemon-reload: yes
+# - name: enable the Containerd service and start it
+#   systemd:
+#     name: containerd
+#     state: restarted
+#     enabled: yes
+#     daemon-reload: yes
 
-- name: install Kubelet
-  apt:
-    name: kubelet=1.29.*
-    state: present
-    update_cache: true
+# - name: install Kubelet
+#   apt:
+#     name: kubelet=1.29.*
+#     state: present
+#     update_cache: true
 
-- name: install Kubeadm
-  apt:
-    name: kubeadm=1.29.*
-    state: present
+# - name: install Kubeadm
+#   apt:
+#     name: kubeadm=1.29.*
+#     state: present
 
-- name: enable the Kubelet service, and enable it persistently
-  service:
-    name: kubelet
-    enabled: yes
+# - name: enable the Kubelet service, and enable it persistently
+#   service:
+#     name: kubelet
+#     enabled: yes
 
-- name: load br_netfilter kernel module
-  community.general.modprobe:
-    name: br_netfilter
-    state: present
+# - name: load br_netfilter kernel module
+#   community.general.modprobe:
+#     name: br_netfilter
+#     state: present
 
-- name: set bridge-nf-call-iptables
-  ansible.posix.sysctl:
-    name: net.bridge.bridge-nf-call-iptables
-    value: 1
+# - name: set bridge-nf-call-iptables
+#   ansible.posix.sysctl:
+#     name: net.bridge.bridge-nf-call-iptables
+#     value: 1
 
-- name: set ip_forward
-  ansible.posix.sysctl:
-    name: net.ipv4.ip_forward
-    value: 1
+# - name: set ip_forward
+#   ansible.posix.sysctl:
+#     name: net.ipv4.ip_forward
+#     value: 1
 
-- name: Pulling the images of k8s control node
-  command: kubeadm config images pull
+# - name: Pulling the images of k8s control node
+#   command: kubeadm config images pull
 
 
 - name: Initializing k8s cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem
+  command: kubeadm init
 
 - name: Setting up kubectl on control Node
   shell:
