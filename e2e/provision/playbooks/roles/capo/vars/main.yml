@@ -6,6 +6,9 @@ service_names:
   - "kubelet"
 
 clusterctl_version: v1.10.1
+orc_version: "v2.1.0"
+
+clusterctl_git_resources: https://github.com/kubernetes-sigs/cluster-api-provider-openstack.git
 
 cloud_name_key: "openstack"
 auth_url: "http://192.168.24.13:5000/v3/"
