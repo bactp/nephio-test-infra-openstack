@@ -5,12 +5,15 @@ service_names:
   - "docker"
   - "kubelet"
 
-clusterctl_version: v1.8.3
+clusterctl_version: v1.10.1
+orc_version: "v2.1.0"
+
+clusterctl_git_resources: https://github.com/kubernetes-sigs/cluster-api-provider-openstack.git
 
 cloud_name_key: "openstack"
 auth_url: "http://192.168.24.13:5000/v3/"
-application_credential_id: "4d59a11231854643be93e4f8b8e57a76"
-application_credential_secret: "kWz4bDkYkE_VIqVghXl4qRL62BXgQ6PfMmNOzzqspVwQvUSl1vqswoLrXLUfcEVgWFiFltXDAF1WBbxlySLyHQ"
+application_credential_id: "ca8224ace8fb41afa5483ef5100e6e2d"
+application_credential_secret: "52wkHGEnV_Y5CnGTLpTe5YOx5LUQi2qWHPcMqianFrRRpQo5DHUHw03nPJv4ZnCWozfQhkwS2HlOyKWf_4lVZA"
 region_name: "RegionOne"
 interface: "public"
 identity_api_version: 3

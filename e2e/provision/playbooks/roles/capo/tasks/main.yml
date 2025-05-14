@@ -110,7 +110,72 @@
   become_method: sudo
   command: mv /tmp/clusterctl-linux-amd64 /usr/local/bin/clusterctl
 
+
+- name: Download and install kustomize via script
+  shell: |
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+    mv kustomize /usr/local/bin/kustomize
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ ansible_env.HOME }}"
+
+- name: Ensure git is installed
+  package:
+    name: git
+    state: present
+
+- name: Clone the repository
+  git:
+    repo: "{{ clusterctl_git_resources }}"
+    dest: "/tmp/clusterapi"
+    version: main
+    force: yes
+
+# - name: Set ORC version
+#   set_fact:
+#     orc_version: "v2.1.0"
+
+- name: Install OpenStack Resource Controller
+  become: yes
+  become_method: sudo
+  shell: |
+    kubectl apply -f "https://github.com/k-orc/openstack-resource-controller/releases/download/{{ orc_version }}/install.yaml"
+  args:
+    warn: false
+
+
 - name: Initialize management cluster
   become: yes
   become_method: sudo
   shell: clusterctl init --infrastructure openstack
+
+
+# - name: Install cert-manager if not already installed
+#   command: kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.yaml
+#   args:
+#     creates: /tmp/cert-manager-installed
+#   register: cert_manager_apply
+
+# - name: Mark cert-manager as installed
+#   file:
+#     path: /tmp/cert-manager-installed
+#     state: touch
+#   when: cert_manager_apply.changed
+
+# - name: Wait for cert-manager webhook to be ready
+#   shell: |
+#     kubectl wait --namespace cert-manager \
+#       --for=condition=Available deployment/cert-manager-webhook \
+#       --timeout=120s
+#   register: webhook_ready
+#   retries: 5
+#   delay: 10
+#   until: webhook_ready.rc == 0
+
+
+# - name: Apply CAPO kustomize resources in config/default
+#   shell: |
+#     kustomize build /tmp/clusterapi/config/default | kubectl apply -f -
+#   args:
+#     executable: /bin/bash
