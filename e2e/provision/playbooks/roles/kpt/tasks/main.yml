@@ -59,17 +59,17 @@
   register: http_port_raw
   changed_when: false
   check_mode: no
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 - name: Extract HTTP port from raw output
   set_fact:
     http_port: "{{ http_port_raw.stdout }}"
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 - name: Display HTTP port
   debug:
     msg: "HTTP port for gitea service is {{ http_port }}"
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 - name: Print Openstack Variable facts
   debug:
@@ -106,7 +106,7 @@
       data:
         node-ip: "{{ hostvars['localhost']['control_node_ip'] }}"
         node-port: "{{ http_port }}"
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" 
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" 
 
 #modify the repo IP address only for the operator
 - name: Create a ConfigMap manifest for Nephio Operator
@@ -147,17 +147,17 @@
   register: http_port_raw
   changed_when: false
   check_mode: no
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 - name: Extract HTTP port from raw output
   set_fact:
     http_port: "{{ http_port_raw.stdout }}"
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 - name: Display HTTP port
   debug:
     msg: "HTTP port for gitea service is {{ http_port }}"
-  when: workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
+  when: workdir == "/tmp/repository/dr" or workdir == "/tmp/repository/mgmt-staging" or workdir == "/tmp/repository/mgmt" or workdir == "/tmp/kpt-pkg/nephio/core/nephio-operator"
 
 # TODO: Improve the render function
 - name: "Render package: {{ pkg }}"
