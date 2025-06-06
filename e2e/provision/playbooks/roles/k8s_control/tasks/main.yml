@@ -288,3 +288,23 @@
     mode: "0666"
     owner: "root"
     group: "docker"
+
+- name: Download Velero tarball
+  get_url:
+    url: https://github.com/vmware-tanzu/velero/releases/download/v1.7.0/velero-v1.7.0-linux-amd64.tar.gz
+    dest: /tmp/velero-v1.7.0-linux-amd64.tar.gz
+
+- name: Extract Velero tarball
+  unarchive:
+    src: /tmp/velero-v1.7.0-linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+# - name: Copy Velero binary to /usr/local/bin
+#   ansible.builtin.copy:
+#     src: /tmp/velero-v1.7.0-linux-amd64/velero
+#     dest: /usr/local/bin/velero
+#     mode: '0755'
+#     remote_src: yes
+- name: Move Velero binary to /usr/local/bin
+  ansible.builtin.command: mv /tmp/velero-v1.7.0-linux-amd64/velero /usr/local/bin/velero

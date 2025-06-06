@@ -74,6 +74,8 @@ nephio:
       - config-management-system
       - resource-group-system
       - argocd
+      - flux-system
+      - minio-system
   kpt:
     packages:
       - repo_uri: "{{ nephio_catalog_repo_uri }}"
@@ -106,4 +108,21 @@ nephio_webui:
       pkg: nephio/optional/webui
       version: main
 
+disaster_recovery:
+  k8s:
+    namespaces:
+      - flux-system
+      - minio-system
+  kpt:
+    packages:
+      - repo_uri: "{{ nephio_catalog_repo_uri }}"
+        pkg: nephio/optional/flux-helm-controllers
+        version: main
+        async: 480
+        poll: 5
+      - repo_uri: "{{ nephio_catalog_repo_uri }}"
+        pkg: nephio/optional/minio
+        version: main
+        async: 480
+        poll: 5
 
