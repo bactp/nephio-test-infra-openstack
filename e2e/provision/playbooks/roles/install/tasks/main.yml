@@ -43,16 +43,28 @@
     context: "{{ k8s.context }}"
 
 
-- name: Deploy Local path provisioner
+# - name: Deploy Local path provisioner
+#   ansible.builtin.include_role:
+#     name: kpt
+#   vars:
+#     repo_uri: "{{ local_path_provisioner.kpt.package.repo_uri }}"
+#     pkg: "{{ local_path_provisioner.kpt.package.pkg }}"
+#     version: "{{ local_path_provisioner.kpt.package.version }}"
+#     context: "{{ k8s.context }}"
+#     kpt_async: 600
+#     kpt_poll: 5   
+
+- name: Deploy longhorn storage provisioner
   ansible.builtin.include_role:
     name: kpt
   vars:
-    repo_uri: "{{ local_path_provisioner.kpt.package.repo_uri }}"
-    pkg: "{{ local_path_provisioner.kpt.package.pkg }}"
-    version: "{{ local_path_provisioner.kpt.package.version }}"
+    repo_uri: "{{ longhorn_storage_provisioner.kpt.package.repo_uri }}"
+    pkg: "{{ longhorn_storage_provisioner.kpt.package.pkg }}"
+    version: "{{ longhorn_storage_provisioner.kpt.package.version }}"
     context: "{{ k8s.context }}"
     kpt_async: 600
     kpt_poll: 5   
+
 
 - name: Init Disaster recovery job ids array
   ansible.builtin.set_fact:
