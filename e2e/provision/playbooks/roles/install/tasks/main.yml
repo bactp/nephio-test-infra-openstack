@@ -42,16 +42,65 @@
   vars:
     context: "{{ k8s.context }}"
 
-- name: Deploy Local path provisioner
+
+# - name: Deploy Local path provisioner
+#   ansible.builtin.include_role:
+#     name: kpt
+#   vars:
+#     repo_uri: "{{ local_path_provisioner.kpt.package.repo_uri }}"
+#     pkg: "{{ local_path_provisioner.kpt.package.pkg }}"
+#     version: "{{ local_path_provisioner.kpt.package.version }}"
+#     context: "{{ k8s.context }}"
+#     kpt_async: 600
+#     kpt_poll: 5   
+
+- name: Deploy longhorn storage provisioner
   ansible.builtin.include_role:
     name: kpt
   vars:
-    repo_uri: "{{ local_path_provisioner.kpt.package.repo_uri }}"
-    pkg: "{{ local_path_provisioner.kpt.package.pkg }}"
-    version: "{{ local_path_provisioner.kpt.package.version }}"
+    repo_uri: "{{ longhorn_storage_provisioner.kpt.package.repo_uri }}"
+    pkg: "{{ longhorn_storage_provisioner.kpt.package.pkg }}"
+    version: "{{ longhorn_storage_provisioner.kpt.package.version }}"
     context: "{{ k8s.context }}"
     kpt_async: 600
     kpt_poll: 5   
+
+
+- name: Init Disaster recovery job ids array
+  ansible.builtin.set_fact:
+    all_kpt_apply_disaster: []
+
+- name: Deploy Disaster recovery packages
+  ansible.builtin.include_role:
+    name: kpt
+  loop: "{{ disaster_recovery.kpt.packages }}"
+  vars:
+    repo_uri: "{{ item.repo_uri }}"
+    pkg: "{{ item.pkg }}"
+    version: "{{ item.version }}"
+    context: "{{ k8s.context }}"
+    kpt_async: "{{ item.async }}"
+    kpt_poll: "{{ item.poll }}"
+
+- name: Wait for Disaster Recovery packages to be applied
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: job_result_disaster_recovery
+  loop: "{{ all_kpt_apply_disaster }}"
+  when: all_kpt_apply_disaster is defined
+  until: job_result_disaster_recovery.finished
+  retries: 60
+  delay: 5
+
+- name: Wait for Disaster Recovery deployments
+  ansible.builtin.include_tasks: wait_deployments.yml
+  loop: "{{ disaster_recovery.k8s.namespaces }}"
+  loop_control:
+    loop_var: namespace
+  vars:
+    context: "{{ k8s.context }}"
+
+
 
 - name: Create gitea user password in nephio-system namespace
   kubernetes.core.k8s:

@@ -11,13 +11,22 @@
 k8s:
   context: kubernetes
 
-local_path_provisioner:
+# local_path_provisioner:
+#   k8s:
+#     namespace: local-path-storage
+#   kpt:
+#     package:
+#       repo_uri: "{{ nephio_catalog_repo_uri }}"
+#       pkg: infra/capi/local-path-provisioner
+#       version: main
+
+longhorn_storage_provisioner:
   k8s:
-    namespace: local-path-storage
+    namespace: longhorn-system
   kpt:
     package:
       repo_uri: "{{ nephio_catalog_repo_uri }}"
-      pkg: infra/capi/local-path-provisioner
+      pkg: infra/capi/longhorn-storage-provisioner
       version: main
 
 
@@ -74,6 +83,8 @@ nephio:
       - config-management-system
       - resource-group-system
       - argocd
+      - flux-system
+      - minio-system
   kpt:
     packages:
       - repo_uri: "{{ nephio_catalog_repo_uri }}"
@@ -106,4 +117,21 @@ nephio_webui:
       pkg: nephio/optional/webui
       version: main
 
+disaster_recovery:
+  k8s:
+    namespaces:
+      - flux-system
+      - minio-system
+  kpt:
+    packages:
+      - repo_uri: "{{ nephio_catalog_repo_uri }}"
+        pkg: nephio/optional/flux-helm-controllers
+        version: main
+        async: 480
+        poll: 5
+      - repo_uri: "{{ nephio_catalog_repo_uri }}"
+        pkg: nephio/optional/minio
+        version: main
+        async: 480
+        poll: 5
 
