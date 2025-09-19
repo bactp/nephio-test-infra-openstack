@@ -55,7 +55,6 @@
     - {pkg: distros/sandbox/repository, dest: /tmp/repository/mgmt}
     - {pkg: nephio/optional/argoapp, dest: /tmp/argoapp/mgmt}
     - {pkg: distros/sandbox/repository, dest: /tmp/repository/mgmt-staging}
-    - { pkg: distros/sandbox/repository, dest: /tmp/repository/dr }
   vars:
     repo_uri: "{{ nephio_catalog_repo_uri }}"
     local_dest_directory: "{{ item.dest }}"
@@ -90,4 +89,3 @@
   loop:
     - mgmt
     - mgmt-staging
-    - dr
