@@ -10,7 +10,7 @@
   become: false
   openstack.cloud.security_group:
     state: present
-    name: "nephio_allow_all_traffic1"
+    name: "allow_all"
     description: "Security group to allow all traffic"
   register: security_group
 
@@ -54,7 +54,7 @@
     flavor: "{{ flavor }}"
     network: "{{ network_id }}"
     security_groups:
-      - nephio_allow_all_traffic1
+      - allow_all
     auto_ip: true  # Automatically assigns a floating IP
     # availability_zone: "{{ availability_zone }}" uncomment if available
   register: servers

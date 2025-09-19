@@ -68,7 +68,7 @@ deprecation_warnings = False
 command_warnings=False
 ask_pass=False
 force_valid_group_names = ignore
-private_key_file= ~/openstack/nephio-test-infra-openstack/e2e/provision/playbooks/nephio.pem
+private_key_file= ~/mgmt-cluster/nephio-test-infra-openstack/e2e/provision/playbooks/workflow-prj.pem
 remote_user=ubuntu
 
 [privilege_escalation]
