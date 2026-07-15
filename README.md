@@ -10,6 +10,11 @@ repository.
 ## Same project running on AWS EC2
 [Here:](https://github.com/vitu1234/nephio-test-infra-aws.git)
 
+## Component versions
+See [e2e/provision/COMPONENT_VERSIONS.md](e2e/provision/COMPONENT_VERSIONS.md) for the current
+software versions used by the OpenStack management cluster bootstrap (Kubernetes, CAPO, ORC,
+kpt/porch, WebUI, Galaxy roles, etc.).
+
 ## Run the following Galaxy commands
 ansible-galaxy collection install ansible.posix
 ansible-galaxy collection install community.general
