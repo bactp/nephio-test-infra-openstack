@@ -5,15 +5,15 @@ service_names:
   - "docker"
   - "kubelet"
 
-clusterctl_version: v1.10.1
-orc_version: "v2.1.0"
+clusterctl_version: v1.13.3
+orc_version: "v2.4.0"
 
 clusterctl_git_resources: https://github.com/kubernetes-sigs/cluster-api-provider-openstack.git
 
 cloud_name_key: "openstack"
 auth_url: "http://192.168.24.13:5000/v3/"
-application_credential_id: "ca8224ace8fb41afa5483ef5100e6e2d"
-application_credential_secret: "52wkHGEnV_Y5CnGTLpTe5YOx5LUQi2qWHPcMqianFrRRpQo5DHUHw03nPJv4ZnCWozfQhkwS2HlOyKWf_4lVZA"
+application_credential_id: "82a56601753a4b0997791c1144933611"
+application_credential_secret: "AellzSflowDRLe0_8WR7yyPNikVFgLKg5NWExnlF6MDaOK7reY3r3TziayKvOoHs7gVuIbRJ7Bofd4lhE9zlhQ"
 region_name: "RegionOne"
 interface: "public"
 identity_api_version: 3
@@ -21,10 +21,10 @@ auth_type: "v3applicationcredential"
 
 openstack_dns_nameservers: "8.8.8.8"
 openstack_failure_domain: "compute"
-openstack_control_plane_machine_flavor: "m1.large"
-openstack_node_machine_flavor: "m1.xlarge"
+openstack_control_plane_machine_flavor: "nephio"
+openstack_node_machine_flavor: "nephio"
 openstack_image_name: "Ubuntu22-CAPI"
-openstack_ssh_key_name: "karmada-kt-24"
+openstack_ssh_key_name: "workflow-prj"
 openstack_external_network_id: "88e1ee39-f1e8-4b1b-b77a-a819a366da2b"
 
 

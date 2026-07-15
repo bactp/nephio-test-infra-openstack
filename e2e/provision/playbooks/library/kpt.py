@@ -288,17 +288,21 @@ class KptClient:
         self._kpt_cmd_path = "/usr/local/bin/kpt"
 
     def _run(self, cmd, changed=True, cwd=None):
-        result = dict(changed=False, rc=0, cmd=" ".join(cmd))
-        try:
-            kpt_result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
-            result["changed"] = changed
-            result["stdout"] = kpt_result.stdout
-            result["stdout_lines"] = kpt_result.stdout.splitlines()
-        except subprocess.CalledProcessError as kptexc:
-            result["rc"] = kptexc.returncode
-            result["stderr"] = kptexc.stderr
-            result["stderr_lines"] = kpt_result.stderr.splitlines()
-            self._module.fail_json(msg="Failed to fetch the package", **result)
+        kpt_result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
+        result = dict(
+            changed=changed,
+            cmd=" ".join(cmd),
+            rc=kpt_result.returncode,
+            stdout=kpt_result.stdout,
+            stdout_lines=kpt_result.stdout.splitlines(),
+            stderr=kpt_result.stderr,
+            stderr_lines=kpt_result.stderr.splitlines(),
+        )
+
+        if kpt_result.returncode != 0:
+            self._module.fail_json(
+                msg="kpt command failed: {}".format(" ".join(cmd)), **result
+            )
 
         self._module.exit_json(**result)
 

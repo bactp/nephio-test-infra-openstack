@@ -148,7 +148,7 @@
 - name: Initialize management cluster
   become: yes
   become_method: sudo
-  shell: clusterctl init --infrastructure openstack
+  shell: clusterctl init --infrastructure openstack:v0.14.6
 
 
 # - name: Install cert-manager if not already installed

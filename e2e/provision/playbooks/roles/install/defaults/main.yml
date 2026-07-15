@@ -35,7 +35,7 @@ gitea:
     username: nephio
     password: secret
 
-nephio_catalog_repo_uri: https://github.com/vitu1234/catalog.git
+nephio_catalog_repo_uri: https://github.com/bactp/catalog.git
 nephio_catalog_branch: main
 
 nephio_stock_repos:

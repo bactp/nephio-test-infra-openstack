@@ -1,2 +1,7 @@
 ---
 # handlers file for roles/k8s_control
+
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted

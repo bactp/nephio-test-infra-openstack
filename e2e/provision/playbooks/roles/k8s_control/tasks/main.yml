@@ -268,14 +268,40 @@
 
 - name: Install Docker packages
   apt:
-    name: 
+    name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
       - docker-buildx-plugin
       - docker-compose
     state: present
-  
+
+# Some OpenStack VM kernels report a version that supports time namespaces
+# without actually being built with CONFIG_TIME_NS, which makes Docker's
+# default private time-namespace fail every container start with:
+# "OCI runtime create failed: runc create failed: namespace {\"time\" \"\"}
+# does not exist: unknown". Disabling the feature avoids the mismatch.
+- name: Disable Docker time-namespaces feature (unsupported on this kernel)
+  copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "features": {
+          "time-namespaces": false
+        }
+      }
+    mode: '0644'
+  notify: Restart docker
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Flush handlers so Docker restarts before it is used
+  meta: flush_handlers
+
 - name: Add user to docker group
   user:
     name: "ubuntu"
